@@ -10,9 +10,12 @@ import butterknife.ButterKnife;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.copell.upscale.model.Product;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -34,6 +37,9 @@ public class ShoppingCart extends AppCompatActivity {
     @BindView(R.id.total_price)
     TextView total_price;
 
+    @BindView(R.id.checkout)
+    Button checkout;
+
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -53,6 +59,13 @@ public class ShoppingCart extends AppCompatActivity {
         shopping_cart_recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         shopping_cart_recyclerView.setHasFixedSize(true);
         shopping_cart_recyclerView.setAdapter(adapter);
+
+        checkout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Snackbar.make()
+            }
+        });
     }
 
     @Override
@@ -84,7 +97,7 @@ public class ShoppingCart extends AppCompatActivity {
                     products.add(p);
                 }
                 if(total_price != null) {
-                    //total_price.setText(totalPrice);
+                    total_price.setText(" $" + String.valueOf(totalPrice));
                 }
                 adapter.notifyDataSetChanged();
             }
