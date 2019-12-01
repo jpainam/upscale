@@ -14,4 +14,15 @@
     <string name="enterur_otp">Enter the code received</string>
     <string name="genrate_otp">Generate</string>
     <string name="enter_your_no">Enter your number</string>
+    <string name="connecting">Connecting.....</string>
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="shared_preference_file">shared_preference_file</string>
+    <string name="title_item_list">Items</string>
+    <string name="title_item_detail">Item Detail</string>
+    <string name="settings">Settings</string>
 </resources>
