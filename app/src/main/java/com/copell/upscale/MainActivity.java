@@ -27,6 +27,7 @@ import com.copell.upscale.interfaces.AddOrRemoveCallbacks;
 import com.copell.upscale.model.Category;
 import com.copell.upscale.model.Product;
 import com.copell.upscale.utils.Converter;
+import com.copell.upscale.utils.IntentIntegrator;
 import com.copell.upscale.utils.ItemClickSupport;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -42,7 +43,9 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -62,8 +65,8 @@ public class MainActivity extends AppCompatActivity implements
     public List<Category> lvCategories = new ArrayList<>();
     public List<Product> subCategories = new ArrayList<>();
     CategoryAdapter rootAdapter;
-    private  static StringBuilder selectedProducts = new StringBuilder();
-
+    FirebaseUser user;
+    MainActivity  mActivity;
     @BindView(R.id.toolbar) Toolbar toolbar;
 
     ShoppingListAdapter subAdapter;
@@ -87,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements
         }catch (Exception ex){
             Log.e(TAG, "Firestore has already started", ex);
         }
+        mActivity = this;
 
         SharedPreferences pref = getApplicationContext().getSharedPreferences(
                 getString(R.string.shared_preference_file), Context.MODE_PRIVATE);
@@ -109,7 +113,9 @@ public class MainActivity extends AppCompatActivity implements
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, ScanBarcodeActivity.class));
+                //startActivity(new Intent(MainActivity.this, ScanBarcodeActivity.class));
+                IntentIntegrator scanIntegrator = new IntentIntegrator(mActivity);
+                scanIntegrator.initiateScan();
             }
         });
 
@@ -201,11 +207,13 @@ public class MainActivity extends AppCompatActivity implements
                 for(DocumentSnapshot doc : queryDocumentSnapshots){
                     Log.i(TAG, doc.getId() + "=>" + doc.getData());
                     Product p = doc.toObject(Product.class);
+                    p.setId(doc.getId());
                     subCategories.add(p);
                 }
                 subAdapter.notifyDataSetChanged();
             }
         });
+        user = FirebaseAuth.getInstance().getCurrentUser();
     }
 
     @Override
@@ -236,7 +244,6 @@ public class MainActivity extends AppCompatActivity implements
         switch (id){
             case R.id.cart_action:
                 intent = new Intent(MainActivity.this, ShoppingCart.class);
-                intent.putExtra("cartproducts", selectedProducts.toString());
                 startActivity(intent);
                 return true;
             case  R.id.action_logout:
@@ -252,9 +259,17 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onAddProduct(Product p) {
         cart_count++;
-        if(selectedProducts.toString().indexOf(p.getId()) == -1) {
+        /*if(selectedProducts.toString().indexOf(p.getId()) == -1) {
             selectedProducts.append(p.getId()).append("#");
-        }
+        }*/
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("idproduct", p.getId());
+        map.put("iduser",  FirebaseAuth.getInstance().getCurrentUser().getUid());
+        map.put("price", p.getPrice());
+        map.put("image", p.getImageURL());
+        db.collection("purchases").document(String.format("%s%s",
+                p.getId(), FirebaseAuth.getInstance().getCurrentUser().getUid())).set(map);
         invalidateOptionsMenu();
         Snackbar.make((CoordinatorLayout)findViewById(R.id.rootView), "Added to cart !!", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();
@@ -266,11 +281,13 @@ public class MainActivity extends AppCompatActivity implements
     public void onRemoveProduct(Product p) {
         cart_count--;
         invalidateOptionsMenu();
-        if(selectedProducts.indexOf(p.getId()) != -1){
+        /*if(selectedProducts.indexOf(p.getId()) != -1){
             selectedProducts.delete(selectedProducts.indexOf(p.getId()),
                     selectedProducts.indexOf(p.getId()) + p.getId().length());
             Log.d(TAG, "Removed " + selectedProducts.toString());
-        }
+        }*/
+        db.collection("purchases").document(String.format("%s%s",
+                p.getId(), FirebaseAuth.getInstance().getCurrentUser().getUid())).delete();
         Snackbar.make((CoordinatorLayout)findViewById(R.id.rootView), "Removed from cart !!", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();
 

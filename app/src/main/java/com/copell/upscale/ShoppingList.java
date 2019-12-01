@@ -17,5 +17,6 @@ public class ShoppingList extends AppCompatActivity {
             getSupportActionBar().setHomeButtonEnabled(false);
             getSupportActionBar().setTitle("Shop List");
         }
+
     }
 }

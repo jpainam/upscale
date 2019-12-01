@@ -4,7 +4,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.copell.upscale"
-        minSdkVersion 17
+        minSdkVersion 24
         targetSdkVersion 28
         multiDexEnabled true
         versionCode 9
@@ -48,6 +48,7 @@ dependencies {
     implementation "com.google.zxing:core:3.3.0"
     implementation 'com.google.zxing:javase:3.3.0'
     implementation 'com.google.android.gms:play-services-vision:19.0.0'
+    implementation 'androidx.multidex:multidex:2.0.1'
 }
 
 
