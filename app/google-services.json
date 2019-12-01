@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "891344263585",
+    "firebase_url": "https://upscale-486af.firebaseio.com",
+    "project_id": "upscale-486af",
+    "storage_bucket": "upscale-486af.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:891344263585:android:4ae3fdf96eaa30233013e0",
+        "android_client_info": {
+          "package_name": "com.copell.upscale"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "891344263585-fl7erlh0aa7gerjg88cb89s83i1s7so6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.copell.upscale",
+            "certificate_hash": "74d530f2cf1673316f2bb2fb4565ad6c2899ae7f"
+          }
+        },
+        {
+          "client_id": "891344263585-mft2288ggs6u3cmqagl2lhhufeusd9c0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSqTGz1AnBvPoME_3i6_qIjtD6LdLFn_E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "891344263585-mft2288ggs6u3cmqagl2lhhufeusd9c0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
