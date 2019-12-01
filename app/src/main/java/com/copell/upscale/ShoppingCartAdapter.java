@@ -4,10 +4,11 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.copell.upscale.model.CartItem;
+import com.copell.upscale.interfaces.AddOrRemoveCallbacks;
 import com.copell.upscale.model.Product;
 import com.squareup.picasso.Picasso;
 
@@ -26,7 +27,7 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
 
     @Override
     public ShoppingCartAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int p1) {
-        View layout = LayoutInflater.from(mContext).inflate(R.layout.cart_list_item, parent, false);
+        View layout = LayoutInflater.from(mContext).inflate(R.layout.product_raw_item, parent, false);
         return new ViewHolder(layout);
     }
 
@@ -36,9 +37,10 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
     }
 
     @Override
-    public void onBindViewHolder(ShoppingCartAdapter.ViewHolder viewHolder, int position) {
+    public void onBindViewHolder(final ShoppingCartAdapter.ViewHolder viewHolder, final int position) {
         viewHolder.bindItem(mCartItems.get(position));
     }
+
 
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -46,7 +48,6 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
         View itemView;
         TextView product_name;
         TextView product_price;
-        TextView product_quantity;
         ImageView product_image;
 
 
@@ -55,7 +56,6 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
             this.itemView = view;
             product_name = itemView.findViewById(R.id.product_name);
             product_price = itemView.findViewById(R.id.product_price);
-            product_quantity = itemView.findViewById(R.id.product_quantity);
             product_image = itemView.findViewById(R.id.product_image);
         }
 
@@ -66,7 +66,6 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
                     .into(product_image);
             product_name.setText(cartItem.getName());
             product_price.setText(String.format("$%s", cartItem.getPrice()));
-            product_quantity.setText("");
         }
     }
 }

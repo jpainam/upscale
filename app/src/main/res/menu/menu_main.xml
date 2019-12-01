@@ -7,10 +7,16 @@
         android:orderInCategory="100"
         android:title="@string/action_Cart"
         app:showAsAction="always" />
-
     <item
-        android:id="@+id/notification_action"
-        android:orderInCategory="100"
-        android:title="@string/action_Notification"
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_black_24dp"
+        android:title="Search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        android:orderInCategory="200"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/action_logout"
+        android:orderInCategory="300"
+        android:title="@string/action_logout"
+        app:showAsAction="never" />
 </menu>

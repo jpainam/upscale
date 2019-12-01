@@ -19,9 +19,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 
-import com.copell.upscale.model.CartItem;
 import com.copell.upscale.model.Product;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -54,7 +52,7 @@ public class InventoryFragment extends Fragment {
     SwipeRefreshLayout swipeRefreshLayout;
 
     private OnFragmentInteractionListener mListener;
-    private ShoppingCartAdapter adapter;
+    private ShoppingListAdapter adapter;
 
     public InventoryFragment() {
         // Required empty public constructor
@@ -91,7 +89,7 @@ public class InventoryFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_inventory, container, false);
         ButterKnife.bind(this, v);
-        adapter = new ShoppingCartAdapter(getActivity().getApplicationContext(), cartItems);
+        adapter = new ShoppingListAdapter(getActivity().getApplicationContext(), cartItems);
         products_recyclerview.setLayoutManager(new LinearLayoutManager(this.getActivity()));
         products_recyclerview.setHasFixedSize(true);
         products_recyclerview.setAdapter(adapter);

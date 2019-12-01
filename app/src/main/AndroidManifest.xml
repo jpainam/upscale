@@ -26,7 +26,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.copell.upscale.ItemListActivity" />
         </activity>
-        <activity android:name=".ShoppingList" />
+        <activity android:name=".ShoppingList"
+            android:parentActivityName=".MainActivity"/>
         <activity android:name=".AuthenticationActivity" />
         <activity
             android:name=".ui.login.LoginActivity"

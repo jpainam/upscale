@@ -31,4 +31,5 @@
     <string name="action_Notification">Notification</string>
     <string name="add">addbt</string>
     <string name="remove">removebt</string>
+    <string name="action_logout">Log out</string>
 </resources>

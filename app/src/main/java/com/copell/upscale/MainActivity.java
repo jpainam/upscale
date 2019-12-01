@@ -14,6 +14,7 @@ import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.multidex.MultiDex;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,12 +23,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
+import com.copell.upscale.interfaces.AddOrRemoveCallbacks;
 import com.copell.upscale.model.Category;
 import com.copell.upscale.model.Product;
 import com.copell.upscale.utils.Converter;
 import com.copell.upscale.utils.ItemClickSupport;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -46,7 +49,7 @@ import javax.annotation.Nullable;
 
 public class MainActivity extends AppCompatActivity implements
         DiscountFragment.OnFragmentInteractionListener,
-        InventoryFragment.OnFragmentInteractionListener {
+        InventoryFragment.OnFragmentInteractionListener, AddOrRemoveCallbacks {
 
     private static int cart_count=0;
     private static final String TAG = "MainActivity";
@@ -59,10 +62,11 @@ public class MainActivity extends AppCompatActivity implements
     public List<Category> lvCategories = new ArrayList<>();
     public List<Product> subCategories = new ArrayList<>();
     CategoryAdapter rootAdapter;
+    private  static StringBuilder selectedProducts = new StringBuilder();
 
     @BindView(R.id.toolbar) Toolbar toolbar;
 
-    ShoppingCartAdapter subAdapter;
+    ShoppingListAdapter subAdapter;
 
     @BindView(R.id.lv_sub_categories) RecyclerView lv_sub_categories;
 
@@ -105,18 +109,13 @@ public class MainActivity extends AppCompatActivity implements
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(android.content.Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                String shareBodyText = "Your help message goes here";
-                intent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject/Title");
-                intent.putExtra(android.content.Intent.EXTRA_TEXT, shareBodyText);
-                startActivity(Intent.createChooser(intent, "Choose message method"));
+                startActivity(new Intent(MainActivity.this, ScanBarcodeActivity.class));
             }
         });
 
 
         rootAdapter = new CategoryAdapter(this, lvCategories);
-        subAdapter = new ShoppingCartAdapter(this, subCategories);
+        subAdapter = new ShoppingListAdapter(this, subCategories);
 
         lv_root_categories.setLayoutManager(new LinearLayoutManager(this));
         lv_root_categories.setHasFixedSize(true);
@@ -223,9 +222,57 @@ public class MainActivity extends AppCompatActivity implements
         menuItem.setIcon(Converter.convertLayoutToImage(MainActivity.this,
                 cart_count,
                 R.drawable.ic_shopping_cart_white_24dp));
-        MenuItem menuItem2 = menu.findItem(R.id.notification_action);
-        menuItem2.setIcon(Converter.convertLayoutToImage(MainActivity.this,
-                2,R.drawable.ic_notifications_white_24dp));
+        //MenuItem menuItem2 = menu.findItem(R.id.action_logout);
+        //menuItem2.setIcon(Converter.convertLayoutToImage(MainActivity.this,
+        //        2,R.drawable.ic_notifications_white_24dp));
         return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        Intent intent;
+        switch (id){
+            case R.id.cart_action:
+                intent = new Intent(MainActivity.this, ShoppingCart.class);
+                intent.putExtra("cartproducts", selectedProducts.toString());
+                startActivity(intent);
+                return true;
+            case  R.id.action_logout:
+                FirebaseAuth.getInstance().signOut();
+                intent = new Intent(getApplicationContext(), AuthenticationActivity.class);
+                startActivity(intent);
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onAddProduct(Product p) {
+        cart_count++;
+        if(selectedProducts.toString().indexOf(p.getId()) == -1) {
+            selectedProducts.append(p.getId()).append("#");
+        }
+        invalidateOptionsMenu();
+        Snackbar.make((CoordinatorLayout)findViewById(R.id.rootView), "Added to cart !!", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+
+
+    }
+
+    @Override
+    public void onRemoveProduct(Product p) {
+        cart_count--;
+        invalidateOptionsMenu();
+        if(selectedProducts.indexOf(p.getId()) != -1){
+            selectedProducts.delete(selectedProducts.indexOf(p.getId()),
+                    selectedProducts.indexOf(p.getId()) + p.getId().length());
+            Log.d(TAG, "Removed " + selectedProducts.toString());
+        }
+        Snackbar.make((CoordinatorLayout)findViewById(R.id.rootView), "Removed from cart !!", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+
     }
 }
