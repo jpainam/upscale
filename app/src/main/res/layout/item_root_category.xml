@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="?selectableItemBackground"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center" >
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:gravity="center|left"
+        android:text="hello"
+        android:textSize="12dp"
+
+        android:id="@+id/category_parent_name"
+        android:paddingLeft="16.0dip"
+        android:paddingRight="16.0dip" />
+</LinearLayout>

@@ -7,40 +7,64 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.multidex.MultiDex;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 
+import com.copell.upscale.model.Category;
+import com.copell.upscale.model.Product;
+import com.copell.upscale.utils.Converter;
+import com.copell.upscale.utils.ItemClickSupport;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 
 public class MainActivity extends AppCompatActivity implements
         DiscountFragment.OnFragmentInteractionListener,
         InventoryFragment.OnFragmentInteractionListener {
 
-
+    private static int cart_count=0;
     private static final String TAG = "MainActivity";
     Account mAccount;
     ViewPager viewPager;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    @BindView(R.id.lv_root_categories) RecyclerView lv_root_categories;
+    public List<Category> lvCategories = new ArrayList<>();
+    public List<Product> subCategories = new ArrayList<>();
+    CategoryAdapter rootAdapter;
+
+    @BindView(R.id.toolbar) Toolbar toolbar;
+
+    ShoppingCartAdapter subAdapter;
+
+    @BindView(R.id.lv_sub_categories) RecyclerView lv_sub_categories;
 
     static {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
@@ -74,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements
             mAccount = CreateSyncAccount(this);
         }*/
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -90,34 +115,39 @@ public class MainActivity extends AppCompatActivity implements
         });
 
 
-        final TabLayout tabLayout = findViewById(R.id.tablayout);
-        viewPager = findViewById(R.id.viewpager);
+        rootAdapter = new CategoryAdapter(this, lvCategories);
+        subAdapter = new ShoppingCartAdapter(this, subCategories);
 
-        final PageAdapter adapter = new PageAdapter(getSupportFragmentManager());
-        viewPager.setAdapter(adapter);
-        tabLayout.post(new Runnable() {
+        lv_root_categories.setLayoutManager(new LinearLayoutManager(this));
+        lv_root_categories.setHasFixedSize(true);
+        lv_root_categories.setAdapter(rootAdapter);
+
+        lv_sub_categories.setLayoutManager(new LinearLayoutManager(this));
+        lv_sub_categories.setHasFixedSize(true);
+        lv_sub_categories.setAdapter(subAdapter);
+
+
+        ItemClickSupport.addTo(lv_root_categories).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
             @Override
-            public void run() {
-                tabLayout.setupWithViewPager(viewPager);
-            }
-        });
-        // Use {@link #addOnPageChangeListener(OnPageChangeListener)}
-        viewPager.setOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-
-        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
+            public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                Category cat = lvCategories.get(position);
+                db.collection("products").whereEqualTo("category", cat.getName())
+                        .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        if(e != null){
+                            Log.w(TAG, e.getMessage());
+                            return;
+                        }
+                        subCategories.clear();
+                        for(DocumentSnapshot doc : queryDocumentSnapshots){
+                            Log.i(TAG, doc.getId() + "=>" + doc.getData());
+                            Product p = doc.toObject(Product.class);
+                            subCategories.add(p);
+                        }
+                        subAdapter.notifyDataSetChanged();
+                    }
+                });
             }
         });
     }
@@ -145,6 +175,38 @@ public class MainActivity extends AppCompatActivity implements
             startActivity(new Intent(MainActivity.this, AuthenticationActivity.class));
             finish();
         }
+        db.collection("categories").addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if(e != null){
+                    Log.w(TAG, e.getMessage());
+                    return;
+                }
+                lvCategories.clear();
+                for(QueryDocumentSnapshot doc : queryDocumentSnapshots){
+                    Category cat = doc.toObject(Category.class);
+                    Log.d(TAG, doc.getId() + "=>" + doc.getData());
+                    lvCategories.add(cat);
+                }
+                rootAdapter.notifyDataSetChanged();
+            }
+        });
+        db.collection("products").addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if(e != null){
+                    Log.w(TAG, e.getMessage());
+                    return;
+                }
+                subCategories.clear();
+                for(DocumentSnapshot doc : queryDocumentSnapshots){
+                    Log.i(TAG, doc.getId() + "=>" + doc.getData());
+                    Product p = doc.toObject(Product.class);
+                    subCategories.add(p);
+                }
+                subAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
@@ -153,4 +215,17 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuItem menuItem = menu.findItem(R.id.cart_action);
+        menuItem.setIcon(Converter.convertLayoutToImage(MainActivity.this,
+                cart_count,
+                R.drawable.ic_shopping_cart_white_24dp));
+        MenuItem menuItem2 = menu.findItem(R.id.notification_action);
+        menuItem2.setIcon(Converter.convertLayoutToImage(MainActivity.this,
+                2,R.drawable.ic_notifications_white_24dp));
+        return true;
+    }
 }
