@@ -12,6 +12,7 @@ import com.copell.upscale.interfaces.AddOrRemoveCallbacks;
 import com.copell.upscale.model.Product;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -67,6 +68,24 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             viewHolder.removeItem.setVisibility(View.GONE);
             ((AddOrRemoveCallbacks)mContext).onRemoveProduct(mCartItems.get(position));
         }
+    }
+
+    public List<Product> searchItems = new ArrayList<>();
+    public List<Product> savedItems = new ArrayList<>();
+
+    public void searchProduct(String newText){
+        searchItems.removeAll(searchItems);
+        for(Product p : mCartItems){
+            if(p.getName().toLowerCase().contains(newText.toLowerCase())
+            || p.getPrice() == Integer.valueOf(newText.toLowerCase())){
+                searchItems.add(0, p);
+            }
+        }
+        mCartItems = searchItems;
+        if(newText.isEmpty()){
+            mCartItems = savedItems;
+        }
+        notifyDataSetChanged();
     }
 
 

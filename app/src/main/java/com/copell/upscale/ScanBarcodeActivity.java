@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -45,7 +46,6 @@ public class ScanBarcodeActivity extends AppCompatActivity {
     private BarcodeDetector barcodeDetector;
     private CameraSource cameraSource;
     private static final int REQUEST_CAMERA_PERMISSION = 201;
-    Button btnAction;
     String intentData = "";
     boolean isEmail = false;
 
@@ -59,10 +59,10 @@ public class ScanBarcodeActivity extends AppCompatActivity {
     private void initViews() {
         txtBarcodeValue = findViewById(R.id.txtBarcodeValue);
         surfaceView = findViewById(R.id.surfaceView);
-        btnAction = findViewById(R.id.btnAction);
+        //btnAction = findViewById(R.id.btnAction);
 
 
-        btnAction.setOnClickListener(new View.OnClickListener() {
+        /*btnAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -76,7 +76,7 @@ public class ScanBarcodeActivity extends AppCompatActivity {
 
 
             }
-        });
+        });*/
     }
 
     private void initialiseDetectorsAndSources() {
@@ -141,14 +141,18 @@ public class ScanBarcodeActivity extends AppCompatActivity {
                                 intentData = barcodes.valueAt(0).email.address;
                                 txtBarcodeValue.setText(intentData);
                                 isEmail = true;
-                                btnAction.setText("ADD CONTENT TO THE MAIL");
+                                //btnAction.setText("ADD CONTENT TO THE MAIL");
                             } else {
                                 isEmail = false;
-                                btnAction.setText("LAUNCH URL");
+                                //btnAction.setText("LAUNCH URL");
                                 intentData = barcodes.valueAt(0).displayValue;
                                 txtBarcodeValue.setText(intentData);
                                 if(intentData != null && !intentData.isEmpty()) {
                                     //sendDataToServer(intentData);
+                                    Intent returnIntent = new Intent();
+                                    returnIntent.putExtra("value", intentData);
+                                    setResult(Activity.RESULT_OK, returnIntent);
+                                    finish();
                                 }
                             }
                         }
@@ -169,8 +173,12 @@ public class ScanBarcodeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         initialiseDetectorsAndSources();
-
-
     }
 
+    @Override
+    public void onBackPressed() {
+        Intent returnIntent = new Intent();
+        setResult(Activity.RESULT_CANCELED, returnIntent);
+        super.onBackPressed();
+    }
 }

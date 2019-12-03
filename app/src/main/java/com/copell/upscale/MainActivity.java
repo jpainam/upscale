@@ -1,6 +1,7 @@
 package com.copell.upscale;
 
 import android.accounts.Account;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,10 +12,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.fragment.app.Fragment;
 import androidx.multidex.MultiDex;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,6 +33,9 @@ import com.copell.upscale.utils.Converter;
 import com.copell.upscale.utils.IntentIntegrator;
 import com.copell.upscale.utils.ItemClickSupport;
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -54,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements
         DiscountFragment.OnFragmentInteractionListener,
         InventoryFragment.OnFragmentInteractionListener, AddOrRemoveCallbacks {
 
+    private static final int CAMERA_SCAN_REQUEST = 1000;
     private static int cart_count=0;
     private static final String TAG = "MainActivity";
     Account mAccount;
@@ -113,9 +120,9 @@ public class MainActivity extends AppCompatActivity implements
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //startActivity(new Intent(MainActivity.this, ScanBarcodeActivity.class));
-                IntentIntegrator scanIntegrator = new IntentIntegrator(mActivity);
-                scanIntegrator.initiateScan();
+                startActivityForResult(new Intent(MainActivity.this, ScanBarcodeActivity.class), CAMERA_SCAN_REQUEST);
+                //IntentIntegrator scanIntegrator = new IntentIntegrator(mActivity);
+                //scanIntegrator.initiateScan();
             }
         });
 
@@ -159,10 +166,48 @@ public class MainActivity extends AppCompatActivity implements
 
 
 
-    /*@Override
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //active.onActivityResult(requestCode, resultCode, data);
-    }*/
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != Activity.RESULT_OK) {
+            Log.e(TAG, "Result ok != RESULT_OK in onActivityResult");
+            return;
+        }
+        if(requestCode == CAMERA_SCAN_REQUEST){
+            String result = data.getStringExtra("value");
+            //Log.d(TAG , "un peu for " + result);
+            if(!result.isEmpty()){
+                String[] tab = result.split("#");
+                String id = tab[0];
+                String name = "";
+                int price = 0;
+
+                db.collection("products").document(id).get()
+                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                Product p = task.getResult().toObject(Product.class);
+                                onAddProduct(p);
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "onActivityResult:", e);
+                    }
+                });
+                /*if (tab.length > 1) {
+                    id = tab[0];
+                    name = tab[1];
+                    price = Integer.valueOf(tab[2]);
+                    Product p = new Product(id, name, price);
+                    onAddProduct(p);
+                }*/
+            }
+        }
+
+    }
+
 
 
 

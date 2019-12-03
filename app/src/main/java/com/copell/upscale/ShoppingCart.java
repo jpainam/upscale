@@ -93,7 +93,9 @@ public class ShoppingCart extends AppCompatActivity {
                     }
                     p.setPrice(Integer.valueOf(map.get("price").toString()));
                     totalPrice += p.getPrice();
-                    p.setImageURL(map.get("image").toString());
+                    if(map.get("image") != null){
+                        p.setImageURL(map.get("image").toString());
+                    }
                     products.add(p);
                 }
                 if(total_price != null) {
