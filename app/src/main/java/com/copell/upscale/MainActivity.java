@@ -188,12 +188,14 @@ public class MainActivity extends AppCompatActivity implements
                 String id = tab[0];
                 String name = "";
                 int price = 0;
-
+                Log.d(TAG, "onActivityResult:" + id);
                 db.collection("products").document(id).get()
                         .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                             @Override
                             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                Product p = task.getResult().toObject(Product.class);
+                                DocumentSnapshot doc = task.getResult();
+                                Product p = doc.toObject(Product.class);
+                                p.setId(doc.getId());
                                 onAddProduct(p);
                             }
                         }).addOnFailureListener(new OnFailureListener() {
@@ -262,6 +264,22 @@ public class MainActivity extends AppCompatActivity implements
                     subCategories.add(p);
                 }
                 subAdapter.notifyDataSetChanged();
+            }
+        });
+
+        db.collection("purchases").whereEqualTo("iduser",
+                FirebaseAuth.getInstance().getCurrentUser().getUid()).addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if(e != null){
+                    Log.e(TAG, "Error:", e);
+                    return;
+                }
+                cart_count = 0;
+                for(DocumentSnapshot doc : queryDocumentSnapshots){
+                    cart_count++;
+                }
+                invalidateOptionsMenu();
             }
         });
         user = FirebaseAuth.getInstance().getCurrentUser();
