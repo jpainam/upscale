@@ -1,6 +1,7 @@
 package com.copell.upscale;
 
 import android.accounts.Account;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +14,7 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.multidex.MultiDex;
@@ -77,6 +79,10 @@ public class MainActivity extends AppCompatActivity implements
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
     }
+
+    private SearchView searchView = null;
+    private SearchView.OnQueryTextListener queryTextListener = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -233,7 +239,36 @@ public class MainActivity extends AppCompatActivity implements
         //MenuItem menuItem2 = menu.findItem(R.id.action_logout);
         //menuItem2.setIcon(Converter.convertLayoutToImage(MainActivity.this,
         //        2,R.drawable.ic_notifications_white_24dp));
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchManager searchManager = (SearchManager) this.getSystemService(Context.SEARCH_SERVICE);
+        if (searchItem != null) {
+            searchView = (SearchView) searchItem.getActionView();
+        }
+        if (searchView != null) {
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(this.getComponentName()));
+
+            queryTextListener = new SearchView.OnQueryTextListener(){
+                @Override
+                public boolean onQueryTextChange(String newText){
+                    Log.e("onQueryTextSubmit", newText);
+                    filterProduct(newText);
+                    return true;
+
+                }
+
+                @Override
+                public boolean onQueryTextSubmit(String query){
+                    Log.e("onQueryTextSubmit", query);
+                    return true;
+                }
+            };
+            searchView.setOnQueryTextListener(queryTextListener);
+        }
         return true;
+    }
+
+    private void filterProduct(String newText) {
+        subAdapter.searchProduct(newText);
     }
 
 
@@ -253,6 +288,7 @@ public class MainActivity extends AppCompatActivity implements
                 finish();
                 return true;
         }
+        searchView.setOnQueryTextListener(queryTextListener);
         return super.onOptionsItemSelected(item);
     }
 

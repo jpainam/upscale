@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.copell.upscale.model.Product;
 import com.google.android.material.snackbar.Snackbar;
@@ -63,7 +64,13 @@ public class ShoppingCart extends AppCompatActivity {
         checkout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Snackbar.make()
+                Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.tencent.mm");
+                if(launchIntent != null){
+                    startActivity(launchIntent);
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "There is no package available in android", Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
