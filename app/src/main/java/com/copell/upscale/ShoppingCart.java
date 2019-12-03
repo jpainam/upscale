@@ -1,6 +1,7 @@
 package com.copell.upscale;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.copell.upscale.model.Product;
 import com.google.android.material.snackbar.Snackbar;
@@ -63,7 +65,15 @@ public class ShoppingCart extends AppCompatActivity {
         checkout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Snackbar.make()
+                Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.tencent.mm");
+                if(launchIntent != null){
+                    Snackbar.make(findViewById(R.id.rootView), "Starting WeChat Payement", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                    startActivity(launchIntent);
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "There is no package available in android", Toast.LENGTH_LONG).show();
+                }
             }
         });
     }

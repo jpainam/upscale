@@ -1,6 +1,7 @@
 package com.copell.upscale;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,9 +22,13 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
     private Context mContext;
     private List<Product> mCartItems;
 
+    public List<Product> searchItems = new ArrayList<>();
+    public List<Product> savedItems = new ArrayList<>();
+
     public ShoppingListAdapter(Context context, List<Product> cartItems) {
         this.mContext = context;
         this.mCartItems = cartItems;
+        this.savedItems = cartItems;
     }
 
     @Override
@@ -70,19 +75,19 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         }
     }
 
-    public List<Product> searchItems = new ArrayList<>();
-    public List<Product> savedItems = new ArrayList<>();
 
-    public void searchProduct(String newText){
+
+    public void searchProduct(String newText) {
+
         searchItems.removeAll(searchItems);
-        for(Product p : mCartItems){
-            if(p.getName().toLowerCase().contains(newText.toLowerCase())
-            || p.getPrice() == Integer.valueOf(newText.toLowerCase())){
+        for(Product p : savedItems){
+            Log.e("onQueryTextReceived", newText);
+            if(p.getName().toLowerCase().contains(newText.toLowerCase())){
                 searchItems.add(0, p);
             }
         }
         mCartItems = searchItems;
-        if(newText.isEmpty()){
+        if(newText.isEmpty()) {
             mCartItems = savedItems;
         }
         notifyDataSetChanged();
