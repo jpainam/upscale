@@ -266,23 +266,24 @@ public class MainActivity extends AppCompatActivity implements
                 subAdapter.notifyDataSetChanged();
             }
         });
-
-        db.collection("purchases").whereEqualTo("iduser",
-                FirebaseAuth.getInstance().getCurrentUser().getUid()).addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                if(e != null){
-                    Log.e(TAG, "Error:", e);
-                    return;
+        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+            db.collection("purchases").whereEqualTo("iduser",
+                    FirebaseAuth.getInstance().getCurrentUser().getUid()).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                    if (e != null) {
+                        Log.e(TAG, "Error:", e);
+                        return;
+                    }
+                    cart_count = 0;
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        cart_count++;
+                    }
+                    invalidateOptionsMenu();
                 }
-                cart_count = 0;
-                for(DocumentSnapshot doc : queryDocumentSnapshots){
-                    cart_count++;
-                }
-                invalidateOptionsMenu();
-            }
-        });
-        user = FirebaseAuth.getInstance().getCurrentUser();
+            });
+            user = FirebaseAuth.getInstance().getCurrentUser();
+        }
     }
 
     @Override
